@@ -87,13 +87,13 @@ void smartArray::resize(int newSize, bool zero) {
 /// INDEX ACCESSORS - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ///
 mixedNumber &smartArray::operator[](int index) {
-    if(index < 0 || index > m_size)
+    if(index < 0 || index >= m_size)
         throw OUT_OF_BOUNDS;
     return list[index];
 }
 
 mixedNumber smartArray::operator[](int index) const {
-    if(index < 0 || index > m_size)
+    if(index < 0 || index >= m_size)
         throw OUT_OF_BOUNDS;
     return list[index];
 }
