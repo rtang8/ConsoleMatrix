@@ -10,7 +10,7 @@
 #include <sstream>
 #include "fraction.h"
 
-enum mixedNumberErrors {INPUT_TOO_LONG, BAD_NUM_INPUT};
+enum mixedNumberErrors {INPUT_TOO_LONG, BAD_NUM_INPUT, HAS_ALPHABET, IMPROPER_SYMBOL_USE};
 
 class mixedNumber {
 private:

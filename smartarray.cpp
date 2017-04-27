@@ -3,40 +3,10 @@
 
 /// CONSTRUCTORS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ///
-//smartArray::smartArray() {
-//    list = NULL;
-//    std::cout << "RUNNING DEFAULT SMARTARRAY CONSTRUCTOR" << std::endl;
-//    try {
-//        resize(5, true);
-//    }
-//    catch (smartArrayErrors e) {
-//        if(e = OUT_OF_BOUNDS) {
-//            std::cout << "OUT OF BOUNDS" << std::endl;
-//        }
-//        if(e = BAD_ARRAY_SIZE) {
-//            std::cout << "BAD ARRAY SIZE" << std::endl;
-//        }
-//    }
-//}
 
 smartArray::smartArray(int size, bool zero) {
-    // Points integer pointer to nothing
     list = NULL;
-
-    //std::cout << "RUNNING SMARTARRAY CONSTRUCTOR" << std::endl;
-
-    // Creates new array of size "size"
-//  try {
         resize(size, zero);
-//  }
-//    catch (smartArrayErrors e) {
-//        if(e = OUT_OF_BOUNDS) {
-//            std::cout << "OUT OF BOUNDS" << std::endl;
-//        }
-//        if(e = BAD_ARRAY_SIZE) {
-//            std::cout << "BAD ARRAY SIZE" << std::endl;
-//        }
-//    }
 }
 
 smartArray::~smartArray() {

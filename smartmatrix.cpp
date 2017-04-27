@@ -178,6 +178,7 @@ ostream& operator<<(ostream &out, smartMatrix list) {
         }
     }
     else {
+
         // Formatting Functions
         int highest = list.highest();
 
@@ -206,13 +207,21 @@ istream& operator>>(istream &in, smartMatrix &list) {
 
     // If file input, retrieve size and fill array
     if(&in == &cin) {
+
         std::cout << "Enter number of rows: ";
-        in >> tempRow;
+        getline(in >> std::ws, input);
+        ss << input;
+        ss >> tempRow;
+
         std::cout << "Enter number of columns: ";
-        in >> tempCol;
+        getline(in >> std::ws, input);
+
+        ss.str(std::string());
+        ss.clear();
+        ss << input;
+        ss >> tempCol;
+
         list.resize(tempRow, tempCol);
-        in.clear();
-        in.ignore(1000, '\n');
 
         for(uint i = 0; i < list.m_row; ++i) {
             for(uint j = 0; j < list.m_col; ++j) {
@@ -223,6 +232,7 @@ istream& operator>>(istream &in, smartMatrix &list) {
             }
         }
     }
+
     // Take in file input
     else {
         getline(in, input);
@@ -239,8 +249,6 @@ istream& operator>>(istream &in, smartMatrix &list) {
         list.m_row = tempRow;
         list.m_col = tempCol;
 
-        //std::cout << "New row value is " << list.m_row << endl;
-        //std::cout << "New column value is " << list.m_col << endl;
 
         for(uint i = 0; i < list.m_row; ++i) {
             for(uint j = 0; j < list.m_col; ++j) {

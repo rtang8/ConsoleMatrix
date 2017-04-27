@@ -184,85 +184,195 @@ std::ostream &operator<<(std::ostream &out, const mixedNumber &x) {
 }
 
 std::istream &operator>>(std::istream &in, mixedNumber &x) {
-    std::string whole;
-    Fraction part;
-    bool notFound, foundDecimal = false;
-    bool isWhole = false;
+
     char ch;
 
-    int counter = 0;
-
+    // Throws away leading whitespaces
     do {
         in.get(ch);
-        ++counter;
-    }
-    while(ch == ' ');
+    } while(ch == ' ');
 
-    if(counter > 10) {
+    // Booleans track existance of characters
+    bool slash = false;
+    bool underScore = false;
+    bool dot = false;
+    bool dash = false;
+    std::string temp;
+    std::stringstream toString;
+
+    do {
+          toString << ch;
+          in.get(ch);
+    } while (ch != '\n' && !in.eof());
+
+    toString >> temp;
+
+    if(&in == &std::cin && temp.length() > 10) {
         throw INPUT_TOO_LONG;
     }
 
-    notFound = true;
-    while(isdigit(ch) || ((ch == '-') && notFound) || ch == '.') {
-        switch(ch) {
-            case '-' : notFound = false;
-                break;
-            case '.' : foundDecimal = true;
+    /// INPUT CHECKING - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    // Scans for all the edge cases and throws errors
+    for(uint i = 0; i < temp.length(); ++i) {
+        if(!isdigit(temp[i]) && temp[i] != '.' && temp[i] != '_' && temp[i] != '/' && temp[i] != '-')
+            throw HAS_ALPHABET;
+        if(temp[i] == '.' && (dot || slash || underScore))
+            throw IMPROPER_SYMBOL_USE;
+        if(temp[i] == '.' && !dot)
+            dot = true;
+
+        if(temp[i] == '/' && (dot || slash))
+            throw IMPROPER_SYMBOL_USE;
+        if(temp[i] == '/' && !slash)
+            slash = true;
+
+        if(temp[i] == '_' && (dot || slash || underScore))
+            throw IMPROPER_SYMBOL_USE;
+        if(temp[i] == '_' && !underScore) {
+            // Ensures there is a number before '_'
+            if(i == 0)
+                throw IMPROPER_SYMBOL_USE;
+            underScore = true;
         }
-        whole += ch;
-        if(!in.get(ch))
-            break;
+
+        if(temp[i] == '-' && (dash || dot || slash || underScore))
+            throw IMPROPER_SYMBOL_USE;
+        if(temp[i] == '-' && !dash) {
+            // Ensures - is the first character
+            if(i != 0) {
+                throw IMPROPER_SYMBOL_USE;
+            }
+            dash = true;
+        }
     }
-    if(foundDecimal) {
+
+    // Ensures underscore is paired with slash
+    if(underScore && !slash)
+        throw IMPROPER_SYMBOL_USE;
+
+    // Ensures something between underscore and slash
+    if(underScore) {
+        if(temp.find('/') - temp.find('_') == 1)
+            throw IMPROPER_SYMBOL_USE;
+    }
+    // Ensures final character is a digit
+    if(!isdigit(temp[temp.length() - 1]))
+        throw IMPROPER_SYMBOL_USE;
+
+
+    /// CONVERSIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    // Puts string into double
+    if(dot) {
         double value;
-        std::string temp;
         std::stringstream ss;
-        ss << whole;
+        ss << temp;
         ss >> value;
-
-        //std::cout << "Value is " << value << std::endl;
-
         x = Fraction(value);
-
         return in;
     }
-    if(ch == '_') {
-        if(isdigit(in.peek()) || in.peek() == '-') {
-            in >> part;
-            mixedNumber temp(part);
-            x = mixedNumber(atoi(whole.c_str())) + temp;
-            in.clear();
-            in.ignore(1000, '\n');
-            isWhole = true;
-        }
+
+    // Puts string into mixed number
+    else if(underScore && slash) {
+
+        size_t uSLoc = temp.find('_');
+        size_t slLoc = temp.find('/');
+
+        // Builds the whole part
+        std::string insert = temp.substr(0, uSLoc);
+        if(dash)
+            insert = insert.substr(1);
+        mixedNumber tempMix(atoi(insert.c_str()));
+
+        // Builds fraction part
+        insert = temp.substr(uSLoc + 1, (slLoc - uSLoc - 1));
+
+        std::string insertTwo = temp.substr(slLoc + 1);
+        Fraction part(atoi(insert.c_str()), atoi(insertTwo.c_str()));
+
+        // Adds the two parts together
+        x = tempMix + part;
+        if(dash)
+            x *= -1;
     }
-//    if(isalpha(ch) || (ispunct(ch) && ch != '/' && ch != '_')) {
-//        if(isWhole) {
+
+    // Puts string into improper fraction
+    else if(slash) {
+
+        size_t slLoc = temp.find('/');
+
+        // Builds fraction part
+        std::string insert = temp.substr(0, slLoc);
+        std::string insertTwo = temp.substr(slLoc + 1);
+
+        mixedNumber finalIn(0, atoi(insert.c_str()), atoi(insertTwo.c_str()));
+        x = finalIn;
+    }
+    else {
+        x = mixedNumber(atoi(temp.c_str()));
+    }
+
+//    notFound = true;
+//    while(isdigit(ch) || ((ch == '-') && notFound) || ch == '.') {
+//        switch(ch) {
+//            case '-' : notFound = false;
+//                break;
+//            case '.' : foundDecimal = true;
+//        }
+//        whole += ch;
+//        if(!in.get(ch))
+//            break;
+//    }
+//    if(foundDecimal) {
+//        double value;
+//        std::string temp;
+//        std::stringstream ss;
+//        ss << whole;
+//        ss >> value;
+
+//        //std::cout << "Value is " << value << std::endl;
+
+//        x = Fraction(value);
+
+//        return in;
+//    }
+//    if(ch == '_') {
+//        if(isdigit(in.peek()) || in.peek() == '-') {
+//            in >> part;
+//            mixedNumber temp(part);
+//            x = mixedNumber(atoi(whole.c_str())) + temp;
+//            in.clear();
+//            in.ignore(1000, '\n');
+//            isWhole = true;
+//        }
+//    }
+////    if(isalpha(ch) || (ispunct(ch) && ch != '/' && ch != '_')) {
+////        if(isWhole) {
+////            in.clear();
+////            in.ignore(1000, '\n');
+////        }
+////        throw BAD_NUM_INPUT;
+////    }
+//    else {
+//        if(ch == '/') {
+//            for(int i = whole.size(); i > -1; --i) {
+//                in.putback(whole[i]);
+//            }
+//            in >> part;
+//            x = part;
+
+//            if(x.m_whole != 0) {
+//                Fraction tempFrac(x.toFraction());
+//                mixedNumber temp(0, tempFrac.getNum(), tempFrac.getDenom());
+//                x = temp;
+//            }
 //            in.clear();
 //            in.ignore(1000, '\n');
 //        }
-//        throw BAD_NUM_INPUT;
+//        else {
+//            x = mixedNumber(atoi(whole.c_str()));
+//        }
 //    }
-    else {
-        if(ch == '/') {
-            for(int i = whole.size(); i > -1; --i) {
-                in.putback(whole[i]);
-            }
-            in >> part;
-            x = part;
-
-            if(x.m_whole != 0) {
-                Fraction tempFrac(x.toFraction());
-                mixedNumber temp(0, tempFrac.getNum(), tempFrac.getDenom());
-                x = temp;
-            }
-            in.clear();
-            in.ignore(1000, '\n');
-        }
-        else {
-            x = mixedNumber(atoi(whole.c_str()));
-        }
-    }
 
     return in;
 }
