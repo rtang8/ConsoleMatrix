@@ -10,13 +10,14 @@ using namespace std;
 enum action {ONE_PARAMETER, HELP_MENU, THREE_PARAMETER,
              FOUR_PARAMETER, FIVE_PARAMETER, ACTION_ERROR};
 
+/// PROTOTYPES
 action checkCommandLine(int argc, char *argv[], string &inputFile, string &inputFileTwo,
                         string &outputFile, string &operation);
 
 void oneParameter(ifstream &fin, ofstream &fout, string inputFile, smartMatrix &finalOut);
 
-void mathParameter(ifstream &fin, ofstream &fout, string inputFile, string inputFileTwo,
-                   string &outputFile, const smartMatrix &finalOut, action op);
+void mathParameter(ifstream &fin, ofstream &fout, string &outputFile,
+                   const smartMatrix &finalOut, action op);
 
 void editMatrix(ofstream &fout, const string &fileName, smartMatrix &finalOut);
 
@@ -55,7 +56,7 @@ int main(int argc, char *argv[]) {
             helpMenu();
         else if(op == ACTION_ERROR)
             actionError();
-        // One parameter -----------------------------------------------------------------------
+        // One parameter ----------------------------------------------------------------------
         else if(op == ONE_PARAMETER)
             oneParameter(fin, fout, inputFile, finalOut);
         // Three parameter --------------------------------------------------------------------
@@ -80,11 +81,11 @@ int main(int argc, char *argv[]) {
 
             // Simply prints out the result of the operation ----------------------------------
             if(op == THREE_PARAMETER)
-                cout << finalOut << endl;
+                cout << finalOut;
 
             // Outputs to a new file if more than three parameters ----------------------------
             else {
-                mathParameter(fin, fout, inputFile, inputFileTwo, outputFile, finalOut, op);
+                mathParameter(fin, fout, outputFile, finalOut, op);
             }
         }
     }
@@ -205,8 +206,8 @@ void oneParameter(ifstream &fin, ofstream &fout, string inputFile, smartMatrix &
 
 
 /// @brief Deals with parameters that use math and file outputs
-void mathParameter(ifstream &fin, ofstream &fout, string inputFile, string inputFileTwo,
-                   string &outputFile, const smartMatrix &finalOut, action op) {
+void mathParameter(ifstream &fin, ofstream &fout, string &outputFile,
+                   const smartMatrix &finalOut, action op) {
 
     bool newFile = false;
     bool firstTime = true; // Checks if first iteration through loop for cin clear
@@ -249,7 +250,7 @@ void mathParameter(ifstream &fin, ofstream &fout, string inputFile, string input
         }
     }
     outputToFile(fout, outputFile, finalOut);
-    cout << finalOut << endl;
+    cout << finalOut;
     cout << "Successfully saved to " << outputFile << '.' << endl;
 }
 /////////////////////////////////////////////////////////////////////////////////
@@ -284,6 +285,8 @@ void editMatrix(ofstream &fout, const string &fileName, smartMatrix &finalOut) {
                     exit(1);
                 }
             }
+            convert.str(std::string());
+            convert.clear();
             convert << userInput;
             convert >> userRow;
 
@@ -328,17 +331,17 @@ void editMatrix(ofstream &fout, const string &fileName, smartMatrix &finalOut) {
 ///
 void checkExtension(string &fileName) {
     size_t findDot = fileName.find('.');
-    if(findDot != string::npos &&  findDot != fileName.length()-4) {
-        cout << "Bad file name." << endl;
+    if(findDot != string::npos &&  findDot != fileName.length()-7) {
+        cout << "Bad file name. Only .matrix extension supported." << endl;
         exit(1);
     }
-    if(findDot != string::npos && fileName.substr(fileName.length()-4) != ".mat") {
+    if(findDot != string::npos && fileName.substr(fileName.length()-7) != ".matrix") {
         cout << fileName.substr(fileName.length()-4) << endl;
-        cout << "Only .mat extension supported." << endl;
+        cout << "Only .matrix extension supported." << endl;
         exit(1);
     }
     if(findDot == string::npos) {
-        fileName += ".mat";
+        fileName += ".matrix";
     }
 }
 /////////////////////////////////////////////////////////////////////////////////
@@ -399,17 +402,19 @@ void outputToFile(ofstream &fout, const string &fileName, const smartMatrix &mat
 /// @brief Prints out a help menu
 ///
 void helpMenu() {
-    cout << "This program allows matrixes to be added or multiplied with each other." << endl << endl;
-    cout << "Usage is: matrix <inputfilename> [<add/multiply> <inputfilename2>] [outputfilename] [/f]" << endl;
-    cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -" << endl;
+    cout << "This program allows matrixes to be added or multiplied with each other."              << endl << endl;
+    cout << "Usage is: matrix <inputfilename> [<add/multiply> <inputfilename2>] [outputfilename] [/f]"     << endl;
+    cout << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"    << endl;
     cout << "<inputfilename>                   -   Allows creation of matrix or edit current matrix file." << endl;
+    cout << "                                          Note : Editing is one-indexed, not zero-indexed."   << endl;
     cout << "[<add/multiply> <inputfilename2>] -   Uses two existing matrix files and performs operation." << endl;
-    cout << "[outputfilename]                  -   Does matrix operation and outputs new file." << endl;
-    cout << "[/f]                              -   Use force to overwrite output matrix, even if the file already exists." << endl;
+    cout << "                                          Note : No files will be overwritten in this."       << endl;
+    cout << "[outputfilename]                  -   Does matrix operation and outputs new file."            << endl;
+    cout << "[/f]                              -   Use force to overwrite output matrix if file exists.  " << endl;
     cout << "\nThere are three types of inputs the matrix can hold and calculate:" << endl;
-    cout << "Fractions     - (int)/(int)          1/2" << endl;
-    cout << "Whole numbers - (int)_(int)/(int)    1_2/3" << endl;
-    cout << "Floats        - (double)             1.23"<< endl;
+    cout << "Fractions     - (int)/(int)        ex. 1/2"   << endl;
+    cout << "Whole numbers - (int)_(int)/(int)  ex. 1_2/3" << endl;
+    cout << "Floats        - (double)           ex. 1.23"  << endl;
 }
 /////////////////////////////////////////////////////////////////////////////////
 
